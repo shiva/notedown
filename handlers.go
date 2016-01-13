@@ -18,7 +18,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func Add(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Add")
     var note Note
     body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
     if err != nil {
@@ -49,5 +48,10 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "List of notes ")
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+
+    if err := json.NewEncoder(w).Encode(notes); err != nil {
+        panic(err)
+    }
 }
