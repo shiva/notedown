@@ -14,7 +14,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
        Note{Name: "Host meetup", CreatedAt: time.Now()},
     }
 
-    json.NewEncoder(w).Encode(notes)
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+
+    if err := json.NewEncoder(w).Encode(notes); err != nil {
+        panic(err)
+    }
 }
 
 func Add(w http.ResponseWriter, r *http.Request) {
