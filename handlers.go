@@ -9,12 +9,7 @@ import (
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusOK)
-
-    if err := json.NewEncoder(w).Encode(notes); err != nil {
-        panic(err)
-    }
+    List(w, r)
 }
 
 func Add(w http.ResponseWriter, r *http.Request) {
@@ -35,12 +30,15 @@ func Add(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    n := RepoCreateNote(note)
+    n := repo.InsertNote(note)
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(http.StatusCreated)
     if err := json.NewEncoder(w).Encode(n); err != nil {
         panic(err)
     }
+}
+
+func Find(w http.ResponseWriter, r *http.Request) {
 }
 
 func Remove(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +49,13 @@ func List(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(http.StatusOK)
 
-    if err := json.NewEncoder(w).Encode(notes); err != nil {
+    notes, err := repo.ListAllNotes()
+    if err != nil {
+        panic(err)
+    }
+
+    err = json.NewEncoder(w).Encode(notes)
+    if err != nil {
         panic(err)
     }
 }

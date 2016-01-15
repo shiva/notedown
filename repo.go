@@ -3,44 +3,84 @@ package main
 import (
     "fmt"
     "time"
+
+    "gopkg.in/mgo.v2"
+    "gopkg.in/mgo.v2/bson"
 )
 
-var currentId int
-
-var notes Notes
-
-func init() {
-    RepoCreateNote(Note{Name: "Write presentation"})
-    RepoCreateNote(Note{Name: "Host meetup"})
+type MongoProperties struct {
+    Uri      string
+    User     string
+    Password string
 }
 
-func RepoFindNote(id int) Note {
-    for _, t := range notes {
-        if t.Id == id {
-            return t
-        }
+type Repo struct {
+    Session *mgo.Session
+    Mongo   MongoProperties
+}
+
+
+func (r Repo) InitDBSession() *mgo.Session {
+    mongoUrl := fmt.Sprintf("mongodb://%s:%s@%s/notedown",
+                            r.Mongo.User,
+                            r.Mongo.Password,
+                            r.Mongo.Uri)
+
+    if len(opts.Verbose) >= 1 {
+        fmt.Printf("Calling Init DB session. Mongo URL: %s\n", mongoUrl)
     }
-    // return empty Note if not found
-    return Note{}
+
+    s, err := mgo.Dial(mongoUrl)
+    if err != nil {
+        fmt.Printf("Cannot connect to Mongo URL: %s\n", mongoUrl)
+        panic(err)
+    }
+
+    return s
 }
 
-func RepoCreateNote(t Note) Note {
-    currentId += 1
-    t.Id = currentId
+func (r *Repo) Init(mongo MongoProperties) {
+    if len(opts.Verbose) >= 1 {
+        fmt.Printf("Mongo URL: %s\n", mongo)
+    }
+
+    r.Mongo = mongo
+}
+
+func (r *Repo) GetSession() *mgo.Session {
+    if r.Session == nil {
+        r.Session = r.InitDBSession()
+    }
+
+    return r.Session
+}
+
+func (r *Repo) FindNote(id bson.ObjectId) (Note, error) {
+
+    n := Note{}
+    err := r.GetSession().DB("notedown").C("notes").FindId(id).One(&n)
+    // return empty Note if not found
+    return n, err
+}
+
+func (r *Repo) InsertNote(t Note) Note {
+    t.Id = bson.NewObjectId()
     if t.CreatedAt.IsZero() {
         t.CreatedAt = time.Now()
     }
 
-    notes = append(notes, t)
+    r.GetSession().DB("notedown").C("notes").Insert(t)
+
     return t
 }
 
-func RepoDestroyNote(id int) error {
-    for i, t := range notes {
-        if t.Id == id {
-            notes = append(notes[:i], notes[i+1:]...)
-            return nil
-        }
-    }
-    return fmt.Errorf("Could not find Note with id of %d to delete", id)
+func (r *Repo) DeleteNote (id bson.ObjectId) error {
+    return r.GetSession().DB("notedown").C("notes").RemoveId(id)
+}
+
+func (r *Repo) ListAllNotes() ([]Note, error) {
+    var notes []Note
+
+    err := r.GetSession().DB("notedown").C("notes").Find(nil).All(&notes)
+    return notes, err
 }
