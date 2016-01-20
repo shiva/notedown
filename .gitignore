@@ -3,6 +3,9 @@
 *.a
 *.so
 
+# Compiler binary
+notedown
+
 # Folders
 _obj
 _test

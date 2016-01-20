@@ -16,23 +16,14 @@ type MongoProperties struct {
 
 type Repo struct {
     Session *mgo.Session
-    Mongo   MongoProperties
+    Info    *mgo.DialInfo
 }
 
 
 func (r Repo) InitDBSession() *mgo.Session {
-    mongoUrl := fmt.Sprintf("mongodb://%s:%s@%s/notedown",
-                            r.Mongo.User,
-                            r.Mongo.Password,
-                            r.Mongo.Uri)
-
-    if len(opts.Verbose) >= 1 {
-        fmt.Printf("Calling Init DB session. Mongo URL: %s\n", mongoUrl)
-    }
-
-    s, err := mgo.Dial(mongoUrl)
+    s, err := mgo.DialWithInfo(r.Info)
     if err != nil {
-        fmt.Printf("Cannot connect to Mongo URL: %s\n", mongoUrl)
+        fmt.Printf("Cannot connect to Mongo URL: %s\n", err)
         panic(err)
     }
 
@@ -44,14 +35,18 @@ func (r *Repo) Init(mongo MongoProperties) {
         fmt.Printf("Mongo URL: %s\n", mongo)
     }
 
-    r.Mongo = mongo
+    r.Info = &mgo.DialInfo{
+        Addrs: []string{mongo.Uri},
+        Timeout:  60 * time.Second,
+        Database: "notedown",
+        Username: mongo.User,
+        Password: mongo.Password,
+    }
+
+    r.Session = r.InitDBSession()
 }
 
 func (r *Repo) GetSession() *mgo.Session {
-    if r.Session == nil {
-        r.Session = r.InitDBSession()
-    }
-
     return r.Session
 }
 
@@ -63,12 +58,13 @@ func (r *Repo) FindNote(id bson.ObjectId) (Note, error) {
     return n, err
 }
 
-func (r *Repo) InsertNote(t Note) Note {
+func (r *Repo) InsertNote(u User, t Note) Note {
     t.Id = bson.NewObjectId()
     if t.CreatedAt.IsZero() {
         t.CreatedAt = time.Now()
     }
 
+    t.UserId = u.Id
     r.GetSession().DB("notedown").C("notes").Insert(t)
 
     return t
@@ -78,9 +74,17 @@ func (r *Repo) DeleteNote (id bson.ObjectId) error {
     return r.GetSession().DB("notedown").C("notes").RemoveId(id)
 }
 
-func (r *Repo) ListAllNotes() ([]Note, error) {
+func (r *Repo) ListAllNotes(u User) ([]Note, error) {
     var notes []Note
 
-    err := r.GetSession().DB("notedown").C("notes").Find(nil).All(&notes)
+    err := r.GetSession().DB("notedown").C("notes").Find(
+        bson.M{"userid": u.Id}).All(&notes)
     return notes, err
+}
+
+func (r *Repo) FindUser(name string) (User, error) {
+    var user User
+    err := r.GetSession().DB("notedown").C("users").Find(bson.M{"userid": name}).One(&user)
+
+    return user, err
 }

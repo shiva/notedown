@@ -30,7 +30,10 @@ func Add(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    n := repo.InsertNote(note)
+	u, err := repo.FindUser("shiva")
+    if err != nil { panic(err) }
+
+    n := repo.InsertNote(u, note)
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(http.StatusCreated)
     if err := json.NewEncoder(w).Encode(n); err != nil {
@@ -49,10 +52,11 @@ func List(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(http.StatusOK)
 
-    notes, err := repo.ListAllNotes()
-    if err != nil {
-        panic(err)
-    }
+	u, err := repo.FindUser("shiva")
+    if err != nil { panic(err) }
+	
+    notes, err := repo.ListAllNotes(u)
+    if err != nil { panic(err) }
 
     err = json.NewEncoder(w).Encode(notes)
     if err != nil {
