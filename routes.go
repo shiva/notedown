@@ -17,5 +17,6 @@ var routes = Routes {
     Route {"Index", "GET", "/", Index},
     Route {"Add", "POST", "/notes/add", Add},
     Route {"Remove", "GET", "/notes/remove/{noteId}", Remove},
+    Route {"Find", "GET", "/notes/find/{noteId}", Find},
     Route {"List", "GET", "/notes/list", List},
 }

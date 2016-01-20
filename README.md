@@ -10,3 +10,6 @@ bookmarking + some intelligence
  - [ ] Support User authentication -- password less?
  - [ ] Support User registration
  - [ ] write javascript bookmarklet to store item 
+ - [ ] API doc? https://github.com/betacraft/yaag
+ - [x] Find one note, given id
+ 
