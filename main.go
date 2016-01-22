@@ -6,6 +6,7 @@ import (
     "log"
     "net/http"
 
+	"github.com/codegangsta/negroni"
     "github.com/jessevdk/go-flags"
 )
 
@@ -36,5 +37,8 @@ func main() {
 
     repo.Init(MongoProperties{opts.MongoUri, opts.MongoUser, opts.MongoPassword})
     rtr := NewRouter()
-    log.Fatal(http.ListenAndServe(":8080", rtr))
+    n := negroni.Classic()
+    n.UseHandler(rtr)
+
+    log.Fatal(http.ListenAndServe(":8080", n))
 }

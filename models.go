@@ -13,7 +13,6 @@ type Note struct {
     CreatedAt time.Time     `json:"created-at" bson:"created-at"`
 }
 
-
 type User struct {
     Id        bson.ObjectId `json:"id" bson:"_id"`
     UserId    string        `json:"userid" bson:"userid"`
