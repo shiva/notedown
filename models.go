@@ -18,5 +18,4 @@ type User struct {
     UserId    string        `json:"userid" bson:"userid"`
     FirstName string        `json:"firstname" bson:"firstname"`
     LastName  string        `json:"lastname" bson:"lastname"`
-    Notes     []bson.ObjectId `json:"notes" bson:"notes"`
 }
