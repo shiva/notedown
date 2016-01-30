@@ -26,6 +26,7 @@ var parser = flags.NewParser(&opts, flags.Default)
 func main() {
 
     if _, err := parser.Parse(); err != nil {
+        panic(err)
         os.Exit(1)
     }
 
