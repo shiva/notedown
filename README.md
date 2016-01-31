@@ -1,4 +1,6 @@
 # notedown
+
+[![Join the chat at https://gitter.im/shiva/notedown](https://badges.gitter.im/shiva/notedown.svg)](https://gitter.im/shiva/notedown?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 bookmarking + some intelligence
 
  - [x] Display list of items on index
