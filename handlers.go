@@ -11,6 +11,22 @@ import (
     "gopkg.in/mgo.v2/bson"
 )
 
+func UserHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := GlobalSessions.SessionStart(w, r)
+	defer session.SessionRelease(w)
+	RenderTemplate(w, "user", session.Get("profile"))
+}
+
+func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	session, _ := GlobalSessions.SessionStart(w, r)
+	defer session.SessionRelease(w)
+	if session.Get("profile") == nil {
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	} else {
+		next(w, r)
+	}
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
     List(w, r)
 }

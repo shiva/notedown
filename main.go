@@ -6,6 +6,7 @@ import (
     "log"
     "net/http"
 
+	"github.com/astaxie/beego/session"
 	"github.com/codegangsta/negroni"
     "github.com/jessevdk/go-flags"
 )
@@ -19,8 +20,12 @@ type Options struct {
     MongoPassword string `short:"p" long:"mongo-password" required:"true" description:"Mongo password."`
 }
 
-var repo Repo
-var opts Options
+var (
+	GlobalSessions *session.Manager
+    repo            Repo
+    opts            Options
+)
+
 var parser = flags.NewParser(&opts, flags.Default)
 
 func main() {
@@ -35,6 +40,9 @@ func main() {
         fmt.Printf("Mongo User: %s\n", opts.MongoUser)
         fmt.Printf("Mongo Password: %s\n", opts.MongoPassword)
     }
+
+	GlobalSessions, _ = session.NewManager("memory", `{"cookieName":"gosessionid","gclifetime":3600}`)
+	go GlobalSessions.GC()
 
     repo.Init(MongoProperties{opts.MongoUri, opts.MongoUser, opts.MongoPassword})
     rtr := NewRouter()

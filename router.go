@@ -44,5 +44,13 @@ func NewRouter() *mux.Router {
             Handler(handler)
     }
 
+    router.HandleFunc("/auth", CallbackHandler)
+	router.Handle("/user", negroni.New(
+		negroni.HandlerFunc(IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(UserHandler)),
+	))
+
+    router.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("public/"))))
+
     return router
 }
