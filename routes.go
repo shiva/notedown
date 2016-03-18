@@ -33,9 +33,9 @@ type Routes []Route
 
 var routes = Routes {
     Route {"Index", "GET", "/", Index, UNSECURED},
-    Route {"Add", "POST", "/notes/add", Add, SECURED},
-    Route {"Remove", "GET", "/notes/remove/{noteId}", Remove, SECURED},
-    Route {"Find", "GET", "/notes/find/{noteId}", Find, SECURED},
-    Route {"List", "GET", "/notes/list", List, SECURED},
+    Route {"Add", "POST", "/notes", Add, SECURED},
+    Route {"Remove", "DELETE", "/notes/{noteId}", Remove, SECURED},
+    Route {"Find", "GET", "/notes/{noteId}", Find, SECURED},
+    Route {"List", "GET", "/notes", List, SECURED},
     //Route {"User", "GET", "/user", UserHandler, SECURED},
 }

@@ -27,8 +27,7 @@ func NewRouter() *mux.Router {
     for _, route := range routes {
         var handler http.Handler
 
-        handler = route.HandlerFunc
-        handler = Logger(handler, route.Name)
+        handler = Logger(route.HandlerFunc, route.Name)
 
         if route.rtype == SECURED {
             handler = negroni.New(
@@ -37,11 +36,7 @@ func NewRouter() *mux.Router {
                 )
         }
 
-        router.
-            Methods(route.Method).
-            Path(route.Pattern).
-            Name(route.Name).
-            Handler(handler)
+        router.Handle(route.Pattern, handler).Name(route.Name).Methods(route.Method)
     }
 
     router.HandleFunc("/auth", CallbackHandler)
